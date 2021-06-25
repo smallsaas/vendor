@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jfeat.am.module.cinema.services.domain.dao.QueryCinemaPermDao">
+
+
+    <select id="getPermGroupByPermIdList" resultType="SysPermGroup">
+        SELECT
+	        sys_perm_group.*
+        FROM
+	        sys_perm_group
+        LEFT JOIN sys_perm ON sys_perm.group_id = sys_perm_group.id
+        WHERE
+	        sys_perm.identifier IN
+             <foreach item="item" index="index" collection="identifierList"
+                     open="(" separator="," close=")">
+                 #{item}
+             </foreach>
+        group by sys_perm_group.identifier
+    </select>
+
+    <select id="getPermByList" resultType="SysPerm">
+        SELECT
+        sys_perm.*
+        FROM
+        sys_perm
+        WHERE
+        sys_perm.identifier IN
+        <foreach item="item" index="index" collection="identifierList"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        group by sys_perm.identifier
+    </select>
+
+    <select id="getPermGroupByList" resultType="SysPermGroup">
+        SELECT
+        sys_perm_group.*
+        FROM
+        sys_perm_group
+        WHERE
+        sys_perm_group.id IN
+        <foreach item="item" index="index" collection="permGroupIds"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="getPermIdsByList" resultType="long">
+        SELECT
+        sys_perm.id
+        FROM
+        sys_perm left join sys_perm_group on sys_perm_group.id = sys_perm.group_id
+        WHERE
+        sys_perm.identifier IN
+        <foreach item="item" index="index" collection="identifierList"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+         and sys_perm_group.org_id = #{orgId}
+    </select>
+
+
+</mapper>

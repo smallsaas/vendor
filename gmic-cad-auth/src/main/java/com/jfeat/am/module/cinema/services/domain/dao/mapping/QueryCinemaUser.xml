@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jfeat.am.module.cinema.services.domain.dao.QueryCinemaUser">
+
+    <sql id="QueryOwnedOrgIds">
+         SELECT children.id FROM t_sys_org, t_sys_org as children WHERE t_sys_org.left_num &lt;= children.left_num AND
+         t_sys_org.right_num >= children.left_num and t_sys_org.id=#{orgId} order by t_sys_org.node_level ASC
+    </sql>
+
+    <select id="findAdvertiserPage" resultType="SysUser">
+    SELECT
+	    u.*
+    FROM
+	    t_sys_user as u
+    LEFT JOIN
+	    sys_user_role on sys_user_role.user_id = u.id
+    LEFT JOIN
+	    sys_role on sys_role.id = sys_user_role.role_id
+        ,(<include refid="QueryOwnedOrgIds"></include>) AS ownedOrgIds
+    where sys_role.role_code = #{roleCode}
+        AND u.org_id = ownedOrgIds.id
+    </select>
+
+    <select id="getOrgUser" resultType="SysUser">
+       SELECT
+        t_sys_user.id
+        FROM
+        t_sys_user
+        where t_sys_user.org_id in
+        (
+        select chi.id from t_sys_org as fa LEFT JOIN t_sys_org as chi
+        on fa.left_num &lt; chi.left_num and fa.right_num> chi.right_num
+        where fa.id=#{orgId}
+        ) or t_sys_user.org_id =#{orgId}
+    </select>
+
+    <update id="setUserDeleteFlag">
+        update t_sys_user set delete_flag = #{deleteFlag}    where id in
+        <foreach collection="ids" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <delete id="deleteUser">
+        delete from t_sys_user   where id in
+        <foreach collection="ids" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deletePermGroupByOrgId">
+        delete from sys_perm_group where sys_perm_group.org_id = #{orgId}
+    </delete>
+
+    <delete id="deleteSysRoleByOrgId">
+        delete from sys_role where sys_role.org_id = #{orgId}
+    </delete>
+
+    <select id="getUserByPhone" resultType="SysUser">
+        select * from t_sys_user where phone = #{phone}
+    </select>
+
+    <update id="updateUserOrgId">
+        update t_sys_user set org_id = #{orgId} where id = #{id}
+    </update>
+
+    <insert id="insertRole">
+        INSERT INTO `sys_role` ( `org_id`, `sort_order`, `pid`, `name`, `tips`, `version`, `role_code`, `made_by`, `user_type`, `delete_flag`) VALUES
+        ( #{orgId}, '1', NULL, #{name}, #{tips}, NULL, NULL, 'USER', NULL, '0');
+
+    </insert>
+
+
+    <update id="updateCinemaPhone">
+       update t_sys_user set phone=#{phone} where id in
+         (
+            select * from
+         (
+         SELECT
+        	t_sys_user.id
+             FROM
+             	t_sys_user
+             LEFT JOIN sys_user_role ON sys_user_role.user_id = t_sys_user.id
+             AND sys_user_role.role_id = 9
+             left JOIN ca_cinema on  ca_cinema.org_id = t_sys_user.org_id
+             where ca_cinema.id = #{id}
+         )t
+        )
+        ;
+    </update>
+
+    <update id="repairPCDData">
+        update ca_cinema,pcd
+        set ca_cinema.city = pcd.`name`
+        where
+        pcd.type = 'c' and (
+        SUBSTRING_INDEX(ca_cinema.`city`,'市',1) = pcd.`name` or
+        SUBSTRING_INDEX(ca_cinema.`city`,'市',1) = SUBSTRING_INDEX(pcd.`name`,'地区',1) or
+        ca_cinema.`city` = SUBSTRING_INDEX(pcd.`name`,'市',1)
+        )
+        ;
+    </update>
+
+    <update id="updateErrorImportPCDDataCinema" >
+
+        UPDATE ca_cinema
+        SET ca_cinema.import_note = CONCAT(IFNULL(ca_cinema.import_note,''),',ERROR_CITY')
+        WHERE
+	        ca_cinema.id IN (
+                select * from(
+
+		        SELECT
+		        	ca_cinema.id
+		        FROM
+		        	ca_cinema
+		        LEFT JOIN pcd ON ca_cinema.city = pcd.`name`
+		        AND pcd.type = 'c'
+		        WHERE
+		        	pcd.`name` IS NULL and  (ca_cinema.`import_note` not like '%ERROR_CITY%' or ca_cinema.import_note is null)
+	            )t
+        )
+;
+    </update>
+
+</mapper>
