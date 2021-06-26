@@ -30,8 +30,7 @@ import java.util.Objects;
 @Component
 public class CinemaLoginAOP {
 
-    @Resource
-    SysUserMapper sysUserMapper;
+
     @Resource
     AdvertiserMapper advertiserMapper;
 

@@ -2,7 +2,8 @@ package com.jfeat.am.module.cinema.services.domain.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.jfeat.am.core.model.UserType;
-import com.jfeat.am.module.cinema.services.domain.model.CinemaUserSetting;
+import com.jfeat.am.module.cinema.services.domain.dao.model.EnterpriseUserSetting;
+import com.jfeat.am.module.cinema.services.domain.model.OrgCodeType;
 import com.jfeat.am.module.cinema.services.domain.service.CinemaOrgService;
 import com.jfeat.am.uaas.system.services.domain.service.SysUserService;
 import com.jfeat.am.uaas.system.services.transfer.UserWrapper;
@@ -30,13 +31,23 @@ public class CinemaOrgServiceImpl implements CinemaOrgService {
     //根据orgCodeType决定父组织
     @Override
     @Transactional
-    public <T> JSONObject createOrg(String OrgCodeType, T t,String bType){
-        Class<?> aClass = t.getClass();
-        Class<?> superclass = t.getClass().getSuperclass();
+    public <T> JSONObject createOrg(String orgCodeType, T t,String bType){
+ /*       Class<?> aClass = t.getClass();
+        Class<?> superclass = t.getClass().getSuperclass();*/
         JSONObject jsonObject=new JSONObject();
         Integer i = 0;
         //获取父组织
-        SysOrg advertiserOrg = sysUserService.getOrgByCode(OrgCodeType);
+        SysOrg advertiserOrg = sysUserService.getOrgByCode(orgCodeType);
+        if(advertiserOrg == null){
+            //如果目标code不存在则创建
+            SysOrg pOrg = new SysOrg();
+            pOrg.setOrgCode(orgCodeType);
+            pOrg.setbType("SYSTEM");
+            pOrg.setName(orgCodeType);
+            pOrg.setOrgType(0);
+            sysOrgService.createNewNode(OrgCodeType.SYSTEM_ORG_ID,pOrg,true);
+            advertiserOrg = sysUserService.getOrgByCode(orgCodeType);
+        }
         //组织
         SysOrg newOrg = new SysOrg();
         String name = getEntityString(t, "name", "companyName");
@@ -138,7 +149,7 @@ public class CinemaOrgServiceImpl implements CinemaOrgService {
             , String userType, String name, List<Long> ids, String password){
 
         if(password==null){
-            password= CinemaUserSetting.default_Password;
+            password= EnterpriseUserSetting.default_Password;
         }
         Integer i = 0;
         UserWrapper sysUser = new UserWrapper();
@@ -166,7 +177,7 @@ public class CinemaOrgServiceImpl implements CinemaOrgService {
         sysUser.setAccount(phone);
         sysUser.setPhone(phone);
         sysUser.setName(name);
-        sysUser.setPassword(CinemaUserSetting.default_Password);
+        sysUser.setPassword(EnterpriseUserSetting.default_Password);
         sysUser.setbUserType(userType);
         sysUser.setUserType(UserType.SAAS_ORG_USER);
         sysUser.setRoleIds(ids);

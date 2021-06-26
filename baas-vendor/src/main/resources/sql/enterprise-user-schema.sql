@@ -1,6 +1,6 @@
 SET FOREIGN_KEY_CHECKS=0;
 
--- 广告主表
+-- 企业表  旧广告主表改
 DROP TABLE IF EXISTS `ca_advertiser`;
 CREATE TABLE `ca_advertiser` (
 `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -33,16 +33,16 @@ CREATE TABLE `ca_advertiser` (
 `avatar` VARCHAR(255) DEFAULT NULL COMMENT '头像',
 PRIMARY KEY (`id`),
 UNIQUE KEY `contact_phone` (`contact_phone`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='广告主表';
+)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='企业表';
 
 
 DROP TABLE IF EXISTS `ca_advertiser_operate_log`;
 CREATE TABLE `ca_advertiser_operate_log` (
   `id` bigint(20)  NOT NULL AUTO_INCREMENT,
   `note` text DEFAULT NULL COMMENT '备注',
-  `advertiser_id` bigint(20) DEFAULT NULL COMMENT '广告主id',
+  `advertiser_id` bigint(20) DEFAULT NULL COMMENT '企业id',
   `status` varchar(50) DEFAULT NULL COMMENT '修改后状态',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='广告主审核记录';
+)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='企业审核记录';
 

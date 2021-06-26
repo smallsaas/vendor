@@ -3,7 +3,6 @@ package com.jfeat.am.module.cinema.services.domain.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.jfeat.am.core.jwt.JWTKit;
-import com.jfeat.am.module.cinema.menu.CinemaUserRole;
 import com.jfeat.am.module.cinema.services.domain.dao.QueryEnterpriseUser;
 import com.jfeat.am.module.cinema.services.domain.model.*;
 import com.jfeat.am.module.cinema.services.domain.service.AdvertiserService;
@@ -71,7 +70,7 @@ public class AdvertiserServiceImpl extends CRUDAdvertiserServiceImpl implements 
     CinemaUserService cinemaUserService;
 
 
-
+    //新建企业调用此api
     @Override
     @Transactional
     public Integer createAdvertiser(AdvertiserDTO advertiserDTO, Boolean comeFromSystem) {
@@ -82,6 +81,11 @@ public class AdvertiserServiceImpl extends CRUDAdvertiserServiceImpl implements 
         //随机生成orgCode
         advertiserDTO.setOrgCode(OrgCodeUtil.genOrgCode());
 
+        //注册的话设置广告主默认名字
+        if(StringUtils.isEmpty(advertiserDTO.getCompanyName())){
+            advertiserDTO.setCompanyName("企业");
+        }
+
         //设置来自 平台 或 来自用户自己注册
         //设置 店小二id 或者 主管id
         if(comeFromSystem){
@@ -89,28 +93,39 @@ public class AdvertiserServiceImpl extends CRUDAdvertiserServiceImpl implements 
             advertiserDTO.setAssistantId(JWTKit.getUserId());
         }else
         {
-            //注册的话设置广告主默认名字
-            advertiserDTO.setCompanyName("总组织");
+
             advertiserDTO.setComeFrom(AdvertiserStatus.COME_FROM_USER);
             advertiserDTO.setAssistantId(0L);
         }
         //*****************************************************************************************
 
         //调用方法创建组织
-        JSONObject org = cinemaOrgService.createOrg (OrgCodeType.ADVERTISER ,advertiserDTO,SysOrgBType.USER);
-        Long pOrgId = Long.parseLong(org.get("pOrgId").toString());
+        JSONObject org = cinemaOrgService.createOrg (OrgCodeType.ENTERPRISE ,advertiserDTO,SysOrgBType.USER);
+      /*  Long pOrgId = Long.parseLong(org.get("pOrgId").toString());*/
         Long newOrgId = Long.parseLong(org.get("id").toString());
 
         //获得审核前的角色
         SysRole sysRole = sysRoleMapper.selectOne(new QueryWrapper<SysRole>()
                 .eq("org_id", OrgCodeType.SYSTEM_ORG_ID)
-                .eq("role_code", UserType.ADVERTISERS_TENANT.toString()));
+                .eq("role_code", EnterpriseUserType.ENTERPRISE_CODE.toString()));
+        if(sysRole == null){
+            //没有角色则手动新建
+            SysRole newRole = new SysRole();
+            newRole.setRoleCode(EnterpriseUserType.ENTERPRISE_CODE.toString());
+            newRole.setOrgId(OrgCodeType.SYSTEM_ORG_ID);
+            newRole.setName(EnterpriseUserType.ENTERPRISE_ROLE_NAME);
+            sysRoleMapper.insert(newRole);
+            sysRole = sysRoleMapper.selectOne(new QueryWrapper<SysRole>()
+                    .eq("org_id", OrgCodeType.SYSTEM_ORG_ID)
+                    .eq("role_code", EnterpriseUserType.ENTERPRISE_CODE.toString()));
+        }
+
         List<Long> ids = List.of(sysRole.getId());
 
         //创建基本账户 自身id作为租户id
         cinemaOrgService.createOrgAdmin(newOrgId, newOrgId, sysUserService.genAccountByString(ADV_USER_ACCOUNT),
                 advertiserDTO.getContactPhone(),
-                SysOrgBType.USER, OrgCodeType.ADVERTISER_ADMIN_NAME,ids,advertiserDTO.getPassword());
+                SysOrgBType.USER, OrgCodeType.ENTERPRISE_ADMIN_NAME,ids,advertiserDTO.getPassword());
 
         //*****************************************************************************************
 
@@ -122,7 +137,7 @@ public class AdvertiserServiceImpl extends CRUDAdvertiserServiceImpl implements 
         setContactInfo(advertiserDTO);
 
         advertiserDTO.setOrgId(newOrgId);
-        //广告主信息表 创建广告主的信息
+        //企业信息表 创建企业的信息
         //注册账户 公司名设空
         if(!comeFromSystem){advertiserDTO.setCompanyName(null);}
         i += advertiserMapper.insert(advertiserDTO);
@@ -182,7 +197,7 @@ public class AdvertiserServiceImpl extends CRUDAdvertiserServiceImpl implements 
       *//*  //获取角色
         SysRole sysRole = sysRoleMapper.selectOne(new QueryWrapper<SysRole>()
                 .eq("org_id", advertiser.getOrgId())
-                .eq("role_code", UserType.ADVERTISERS_TENANT.toString()));
+                .eq("role_code", EnterpriseUserType.ADVERTISERS_TENANT.toString()));
         List<Long> ids = List.of(sysRole.getId());
         //*****************************************************************************************
 
@@ -202,7 +217,18 @@ public class AdvertiserServiceImpl extends CRUDAdvertiserServiceImpl implements 
         //获得审核后的角色
         SysRole sysRole = sysRoleMapper.selectOne(new QueryWrapper<SysRole>()
                 .eq("org_id", OrgCodeType.SYSTEM_ORG_ID)
-                .eq("role_code", UserType.ADVERTISERS_TENANT_APPROVED.toString()));
+                .eq("role_code", EnterpriseUserType.ENTERPRISE_APPROVED_CODE.toString()));
+        if(sysRole == null){
+            //没有角色则手动新建
+            SysRole newRole = new SysRole();
+            newRole.setRoleCode(EnterpriseUserType.ENTERPRISE_APPROVED_CODE.toString());
+            newRole.setOrgId(OrgCodeType.SYSTEM_ORG_ID);
+            newRole.setName(EnterpriseUserType.ENTERPRISE_APPROVED_ROLE_NAME);
+            sysRoleMapper.insert(newRole);
+            sysRole = sysRoleMapper.selectOne(new QueryWrapper<SysRole>()
+                    .eq("org_id", OrgCodeType.SYSTEM_ORG_ID)
+                    .eq("role_code", EnterpriseUserType.ENTERPRISE_CODE.toString()));
+        }
         List<Long> ids = List.of(sysRole.getId());
 
         //分配角色

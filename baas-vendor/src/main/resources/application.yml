@@ -82,17 +82,17 @@ logging:
 spring:
   profiles: dev
   datasource:
-#      url: jdbc:mysql://localhost:3307/cinema?characterEncoding=utf8&autoReconnect=true&useUnicode=true&useSSL=false&serverTimezone=GMT%2B8
-      url: jdbc:mysql://xingyu.cloud.smallsaas.cn:23306/cinema?characterEncoding=utf8&autoReconnect=true&useUnicode=true&useSSL=false&serverTimezone=GMT%2B8
+      url: jdbc:mysql://localhost:3307/enterprise?characterEncoding=utf8&autoReconnect=true&useUnicode=true&useSSL=false&serverTimezone=GMT%2B8
+#      url: jdbc:mysql://xingyu.cloud.smallsaas.cn:23306/cinema?characterEncoding=utf8&autoReconnect=true&useUnicode=true&useSSL=false&serverTimezone=GMT%2B8
       username: root
-      password: rootAZaz@123
+      password: root
       #username: root
       #password: root
       filters: log4j,wall,mergeStat
       sql-script-encoding: UTF-8
       schema: classpath*:sql/**/*-schema.sql
       data: classpath*:sql/**/*-data.sql
-      initialize: false
+      initialize: true
 
 logging:
   level: debug

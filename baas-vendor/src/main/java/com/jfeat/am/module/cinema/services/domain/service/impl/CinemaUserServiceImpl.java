@@ -5,8 +5,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jfeat.am.core.jwt.JWTKit;
 import com.jfeat.am.module.cinema.services.domain.dao.QueryEnterpriseUser;
 import com.jfeat.am.module.cinema.services.domain.dao.model.EnterpriseUser;
+import com.jfeat.am.module.cinema.services.domain.model.EnterpriseUserType;
 import com.jfeat.am.module.cinema.services.domain.model.OrgCodeType;
-import com.jfeat.am.module.cinema.services.domain.model.UserType;
 import com.jfeat.am.module.cinema.services.domain.service.CinemaOrgService;
 import com.jfeat.am.module.cinema.services.domain.service.CinemaUserService;
 import com.jfeat.am.module.cinema.services.gen.persistence.dao.AdvertiserMapper;
@@ -182,16 +182,16 @@ public class CinemaUserServiceImpl implements CinemaUserService {
 
     @Deprecated
     public boolean isKeeper(EnterpriseUser enterpriseUser){
-       boolean isKeeper = enterpriseUser.getbUserType().equals(UserType.SYSTEM_SHOPKEEPER)
-                        || enterpriseUser.getbUserType().equals(UserType.SYSTEM_BUSINESS);
+       boolean isKeeper = enterpriseUser.getbUserType().equals(EnterpriseUserType.SYSTEM_SHOPKEEPER)
+                        || enterpriseUser.getbUserType().equals(EnterpriseUserType.SYSTEM_BUSINESS);
 
         return isKeeper;
     }
 
     @Deprecated
     public boolean isKeeperManager(EnterpriseUser enterpriseUser){
-        boolean isKeeperManager = enterpriseUser.getbUserType().equals(UserType.SYSTEM_SHOPKEEPER_MANAGER)
-                || enterpriseUser.getbUserType().equals(UserType.SYSTEM_BUSINESS_MANAGER);
+        boolean isKeeperManager = enterpriseUser.getbUserType().equals(EnterpriseUserType.SYSTEM_SHOPKEEPER_MANAGER)
+                || enterpriseUser.getbUserType().equals(EnterpriseUserType.SYSTEM_BUSINESS_MANAGER);
 
         return isKeeperManager;
     }
@@ -200,7 +200,7 @@ public class CinemaUserServiceImpl implements CinemaUserService {
     @Deprecated
     public boolean isNormalAccount(EnterpriseUser enterpriseUser){
 
-        if(enterpriseUser.getbUserType().equals(UserType.SYSTEM_USER)){
+        if(enterpriseUser.getbUserType().equals(EnterpriseUserType.SYSTEM_USER)){
             return true;
         }else {
             return false;

@@ -50,7 +50,7 @@ import java.util.List;
 @RestController
 
 @Api("Advertiser")
-@RequestMapping("/api/crud/advertiser/advertisers")
+@RequestMapping("/api/crud/enterprise/enterprises")
 public class AdvertiserEndpoint {
 
 
@@ -65,10 +65,10 @@ public class AdvertiserEndpoint {
     @Resource
     AdvertiserOperateLogMapper advertiserOperateLogMapper;
 
-    @BusinessLog(name = "广告主", value = "平台新增 广告主")
+    @BusinessLog(name = "企业", value = "平台新增 企业")
     @Permission(AdvertiserPermission.ADVERTISER_NEW)
     @PostMapping
-    @ApiOperation(value = "平台新建广告主", response = AdvertiserDTO.class)
+    @ApiOperation(value = "平台新建企业", response = AdvertiserDTO.class)
     public Tip createAdvertiser(@RequestBody AdvertiserDTO entity) {
         Integer affected = 0;
         try {
@@ -81,7 +81,7 @@ public class AdvertiserEndpoint {
 
     @Permission(AdvertiserPermission.ADVERTISER_VIEW)
     @GetMapping("/{id}")
-    @ApiOperation(value = "查看 广告主", response = Advertiser.class)
+    @ApiOperation(value = "查看 企业", response = Advertiser.class)
     public Tip getAdvertiser(@PathVariable Long id) {
         AdvertiserRecord detail = queryAdvertiserDao.findDetail(id);
         StringBuilder stringBuilder=new StringBuilder();
@@ -92,10 +92,10 @@ public class AdvertiserEndpoint {
         return SuccessTip.create(detail);
     }
 
-    @BusinessLog(name = "广告主", value = "更新 广告主")
+    @BusinessLog(name = "企业", value = "更新 企业")
     @Permission(AdvertiserPermission.ADVERTISER_EDIT)
     @PutMapping("/{id}")
-    @ApiOperation(value = "修改 广告主", response = AdvertiserDTO.class)
+    @ApiOperation(value = "修改 企业", response = AdvertiserDTO.class)
     public Tip updateAdvertiser(@PathVariable Long id, @RequestBody AdvertiserDTO entity) {
         entity.setId(id);
         return SuccessTip.create(advertiserService.updateAdvertiser(entity));
@@ -112,11 +112,11 @@ public class AdvertiserEndpoint {
 
 
 
-    //广告主审核
-    @BusinessLog(name = "广告主", value = "广告主审核")
+    //企业审核
+    @BusinessLog(name = "企业", value = "企业审核")
     @Permission(AdvertiserPermission.ADVERTISER_EDIT)
     @PutMapping("/pass/{id}/{status}")
-    @ApiOperation(value = "广告主审核", response = AdvertiserDTO.class)
+    @ApiOperation(value = "企业信息审核", response = AdvertiserDTO.class)
     public Tip passAdvertiser(@PathVariable Long id,@PathVariable String status,
                               @RequestBody AdvertiserOperateLog advertiserOperateLog) {
         //如果是审核通过 检查是否有分配店小二

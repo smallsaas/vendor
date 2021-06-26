@@ -28,12 +28,12 @@
 
     <dependencies>
 
-        <dependency>
+<!--        <dependency>
             <groupId>com.jfeat</groupId>
             <artifactId>crud-dev</artifactId>
             <version>0.0.2</version>
             <scope>provided</scope>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>com.jfeat</groupId>
             <artifactId>field-config</artifactId>
