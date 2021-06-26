@@ -26,10 +26,7 @@
     </dependencies>
 
     <modules>
-        <module>gmic-cad-auth</module>
         <module>baas-vendor</module>
-
-
     </modules>
 
 

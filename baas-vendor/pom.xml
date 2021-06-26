@@ -40,6 +40,11 @@
             <version>1.2.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.jfeat</groupId>
+            <artifactId>uaas</artifactId>
+            <version>3.0.2</version>
+        </dependency>
 
     </dependencies>
 
